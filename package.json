@@ -6,11 +6,13 @@
   "version": "0.0.0",
   "serverHost": "",
   "serverPath": "",
-  "serverUser": "",
-  "serverPass": "",
+  "serverLogin": {
+    "username": "",
+    "password": ""
+  },
 
 
-  
+
   "banner": "/*! \n * <%= pkg.name %> by <%= pkg.author %> (@<%= pkg.twitter %>) \n * v<%= pkg.version %> from <%= grunt.template.today('yyyy-mm-dd') %> \n*/\n\n",
   "dependencies": {},
   "devDependencies": {

@@ -362,10 +362,8 @@ module.exports = function (grunt) {
                 auth: {
                     host: '<%= pkg.serverHost %>',
                     port: 21,
-                    authKey: {
-                        username: '<%= pkg.serverUser %>',
-                        password: '<%= pkg.serverPass %>',
-                    }
+                    authKey: 'serverLogin',
+                    authPath: 'package.json'
                 },
                 src: '<%= paths.deploy %>/',
                 dest: '<%= pkg.serverPath %>',
