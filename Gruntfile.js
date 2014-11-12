@@ -99,8 +99,8 @@ module.exports = function (grunt) {
                     css: [
                         '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/main.css'
                     ],
-                    width: 320,
-                    height: 320
+                    width: 1280,
+                    height: 800
                 },
                 src: '<%= paths.dev %>/index.html',
                 dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/critical.css'
@@ -123,6 +123,12 @@ module.exports = function (grunt) {
                         cwd: '<%= paths.dev %>/<%= paths.lib %>/',
                         src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.lib %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.dev %>/<%= paths.img %>/',
+                        src: '**/*.*',
+                        dest: '<%= paths.deploy %>/<%= paths.img %>/'
                     },
                     {
                         expand: true,
@@ -155,7 +161,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/',
-                        src: '**.*',
+                        src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.css %>/'
                     },
                     {
@@ -171,7 +177,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.js %>/',
-                        src: '**.*',
+                        src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.js %>/'
                     }
                 ]
@@ -180,8 +186,8 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.lib %>/',
-                        src: '**.*',
+                        cwd: '<%= paths.dev %>/<%= paths.lib %>/',
+                        src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.lib %>/'
                     }
                 ]
@@ -190,8 +196,8 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.img %>/',
-                        src: '**.*',
+                        cwd: '<%= paths.dev %>/<%= paths.img %>/',
+                        src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.img %>/'
                     }
                 ]
@@ -265,11 +271,12 @@ module.exports = function (grunt) {
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             test: {
-                files: ['<%= paths.dev %>/<%= paths.test %>/spec/*.js'],
+                files: ['<%= paths.dev %>/<%= paths.test %>/spec/*.js'], 
                 tasks: ['connect:test', 'jasmine']
             },
             gruntfile: {
-                files: ['Gruntfile.js']
+                files: ['Gruntfile.js'],
+                tasks: ['build', 'inline', 'copy:full']
             },
 
             less: {
@@ -288,21 +295,21 @@ module.exports = function (grunt) {
 
             lib: {
                 files: [
-                    '<%= paths.dev %>/<%= paths.lib %>/**.*',
+                    '<%= paths.dev %>/<%= paths.lib %>/**/*.*',
                 ],
                 tasks: ['copy:lib']
             },
 
             img: {
                 files: [
-                    '<%= paths.dev %>/<%= paths.img %>/**.*',
+                    '<%= paths.dev %>/<%= paths.img %>/**/*.*',
                 ],
                 tasks: ['imagemin', 'svgmin', 'copy:img']
             },
 
             html: {
                 files: [
-                    '<%= paths.dev %>/*.html',
+                    '<%= paths.dev %>/*.html', 
                 ],
                 tasks: ['critical', 'inline', 'copy:html']
             },

@@ -1,8 +1,10 @@
 (function (window, app, data) {
-    app.loadCSS = function (url, name) {
+    app.loadCSS = function (url, callback) {
 
         function afterLoad () {
             app.log ("CSS loaded: " + url, "load.js");
+
+            if (callback) callback();
         }
 
         // Adding the script tag to the head as suggested before
@@ -21,7 +23,7 @@
         head.appendChild(css);
     };
 
-    app.loadScript = function (url, callback, name) {
+    app.loadScript = function (url, callback) {
 
         function afterLoad () {
             app.log ("Script loaded: " + url, "load.js");
