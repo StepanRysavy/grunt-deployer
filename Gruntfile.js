@@ -16,10 +16,12 @@ module.exports = function (grunt) {
         // Configurable paths
         paths: {
             dev: 'Code',
-            deploy: 'Deploy',
+            base: 'Base',
+            deploy: 'Richload',
             build: '.build',
             img: 'img',
             css: 'css',
+            fonts: 'css/fonts',
             js: 'js',
             lib: 'lib',
             zip: 'ZIP',
@@ -32,7 +34,76 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         zip: {
-          '<%= paths.zip %>/<%= paths.root %>.zip': ['<%= paths.build %>/**/*.*']
+            base: {
+                cwd: '<%= paths.base %>',
+                src: ['<%= paths.base %>/**/*.*'],
+                dest: '<%= paths.zip %>/<%= paths.root %>_Base.zip'
+            },
+            richload: {
+                cwd: '<%= paths.deploy %>',
+                src: ['<%= paths.deploy %>/**/*.*'],
+                dest: '<%= paths.zip %>/<%= paths.root %>_Richload.zip'
+            }
+        },
+
+        replace: {
+          dist: {
+            options: {
+              patterns: [
+                {
+                  match: '{{width}}',
+                  replacement: '<%= pkg.width %>'
+                },
+                {
+                  match: '{{height}}',
+                  replacement: '<%= pkg.height %>'
+                },
+                {
+                  match: '{{api}}',
+                  replacement: '<%= pkg.api %>'
+                }
+              ],
+              usePrefix: false
+            },
+            files: [
+              {expand: true, flatten: true, src: ['<%= paths.dev %>/*.*'], dest: '<%= paths.build %>/'}
+            ]
+          },
+          serve: {
+            options: {
+              patterns: [
+                {
+                  match: '{{test}}',
+                  replacement: ''
+                }
+              ],
+              usePrefix: false
+            },
+            files: [
+              {expand: true, flatten: true, src: ['<%= paths.build %>/*.*'], dest: '<%= paths.build %>/'}
+            ]
+          },
+          deploy: {
+            options: {
+              patterns: [
+                {
+                  match: '{{test}}',
+                  replacement: ' '
+                }
+              ],
+              usePrefix: false
+            },
+            files: [
+              {expand: true, flatten: true, src: ['<%= paths.build %>/*.*'], dest: '<%= paths.build %>/'}
+            ]
+          }
+        },
+
+        rename: {
+            base: {
+                src: '<%= paths.base %>/base.html',
+                dest: '<%= paths.base %>/index.html'
+            }
         },
 
         // Build less files into css ones
@@ -54,6 +125,7 @@ module.exports = function (grunt) {
                     }
                 ]
             }
+
         },
 
         cssmin: {
@@ -70,8 +142,7 @@ module.exports = function (grunt) {
         // Concatenate files to reduce requests count
         concat: {
             options: {
-                stripBanners: true,
-                banner: '<%= pkg.banner %>'
+                stripBanners: true
             },
             scripts: {
                 src: [
@@ -84,7 +155,7 @@ module.exports = function (grunt) {
             },
             styles: {
                 src: [
-                    '<%= paths.dev %>/<%= paths.css %>/**/*.css',
+                    '<%= paths.dev %>/<%= paths.css %>/*.css',
                     '<%= paths.build %>/<%= paths.css %>/*.css'
                 ],
                 dest: '<%= paths.build %>/<%= paths.css %>/main.css'
@@ -102,28 +173,6 @@ module.exports = function (grunt) {
             }
         },
 
-        critical: {
-            test: {
-                options: {
-                    base: './',
-                    css: [
-                        '<%= paths.build %>/<%= paths.css %>/main.css'
-                    ],
-                    width: 1280,
-                    height: 800
-                },
-                src: '<%= paths.dev %>/index.html',
-                dest: '<%= paths.build %>/<%= paths.css %>/critical.css'
-            }
-        },
-
-        inline: {
-            dist: {
-                src: ['<%= paths.dev %>/index.html'],
-                dest: ['<%= paths.build %>/']
-            }
-        },
-
         // Copies remaining files to places other tasks can use
         copy: {
             full: {
@@ -136,27 +185,55 @@ module.exports = function (grunt) {
                     },
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.img %>/',
+                        cwd: '<%= paths.dev %>/<%= paths.fonts %>/',
+                        src: '**/*.*',
+                        dest: '<%= paths.deploy %>/<%= paths.fonts %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.build %>/<%= paths.css %>/',
+                        src: '**/*.*',
+                        dest: '<%= paths.deploy %>/<%= paths.css %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.build %>/<%= paths.img %>/',
                         src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.img %>/'
                     },
                     {
                         expand: true,
+                        cwd: '<%= paths.build %>/<%= paths.js %>/',
+                        src: '**/*.*',
+                        dest: '<%= paths.deploy %>/<%= paths.js %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.build %>',
+                        src: 'index.html',
+                        dest: '<%= paths.deploy %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.build %>',
+                        src: 'base.html',
+                        dest: '<%= paths.base %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.build %>',
+                        src: 'manifest.js',
+                        dest: '<%= paths.base %>/'
+                    }
+                ]
+            },
+            build: {
+                files: [
+                    {
+                        expand: true,
                         cwd: '<%= paths.build %>',
                         src: '**/*.*',
                         dest: '<%= paths.deploy %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/',
-                        src: '*.*',
-                        dest: '<%= paths.deploy %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.bower %>',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.lib %>/<%= paths.bower %>'
                     }
                 ]
             },
@@ -165,7 +242,7 @@ module.exports = function (grunt) {
                     {
                         expand: true,
                         cwd: '<%= paths.build %>/<%= paths.css %>/',
-                        src: '**/*.css',
+                        src: '*.css',
                         dest: '<%= paths.deploy %>/<%= paths.css %>/'
                     }
                 ]
@@ -174,7 +251,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/',
+                        cwd: '<%= paths.build %>/',
                         src: '*.*',
                         dest: '<%= paths.deploy %>/'
                     }
@@ -210,32 +287,48 @@ module.exports = function (grunt) {
                     }
                 ]
             },
-            html: {
+            fonts: {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/',
-                        src: '*.html',
-                        dest: '<%= paths.deploy %>/'
-                    },
+                        cwd: '<%= paths.dev %>/<%= paths.fonts %>/',
+                        src: '**/*.*',
+                        dest: '<%= paths.deploy %>/<%= paths.fonts %>/'
+                    }
+                ]
+            },
+            manifest: {
+                files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>',
-                        src: 'index.html',
+                        cwd: '<%= paths.base %>',
+                        src: 'manifest.js',
                         dest: '<%= paths.deploy %>/'
                     }
                 ]
             }
-
         },
 
         // Add vendor prefixed styles
         autoprefixer: {
             options: {
-                browsers: ['last 2 version', 'ie >= 9'],
-                map: true
+                browsers: ['last 2 version', 'ie >= 9']
             },
             full: {
+                options: {
+                    map: true
+                },
+                files: [{
+                    expand: true,
+                    cwd: '<%= paths.build %>/<%= paths.css %>/',
+                    src: '*.css',
+                    dest: '<%= paths.build %>/<%= paths.css %>/'
+                }]
+            },
+            deploy: {
+                options: {
+                    map: false
+                },
                 files: [{
                     expand: true,
                     cwd: '<%= paths.build %>/<%= paths.css %>/',
@@ -278,15 +371,6 @@ module.exports = function (grunt) {
 
         // Watches files for changes and runs tasks based on the changed files
         watch: {
-            test: {
-                files: ['<%= paths.dev %>/<%= paths.test %>/spec/*.js'], 
-                tasks: ['connect:test', 'jasmine']
-            },
-            gruntfile: {
-                files: ['Gruntfile.js'],
-                tasks: ['build', 'copy:full']
-            },
-
             less: {
                 files: [
                     '<%= paths.dev %>/<%= paths.css %>/**/*.less',
@@ -306,7 +390,7 @@ module.exports = function (grunt) {
                     '<%= paths.dev %>/*.*',
                 ], 
                 tasks: [
-                    'copy:rootfiles'
+                    'replace:dist', 'replace:serve', 'copy:rootfiles'
                 ]
             },
 
@@ -314,7 +398,7 @@ module.exports = function (grunt) {
                 files: [
                     '<%= paths.dev %>/<%= paths.js %>/**/*.js',
                 ],
-                tasks: ['jshint', 'concat:scripts', 'copy:scripts']
+                tasks: ['concat:scripts', 'copy:scripts']
             },
 
             lib: {
@@ -329,13 +413,6 @@ module.exports = function (grunt) {
                     '<%= paths.dev %>/<%= paths.img %>/**/*.*',
                 ],
                 tasks: ['imagemin', 'svgmin', 'copy:img']
-            },
-
-            html: {
-                files: [
-                    '<%= paths.dev %>/*.html', 
-                ],
-                tasks: ['copy:html']
             },
 
             livereload: {
@@ -390,8 +467,10 @@ module.exports = function (grunt) {
                 files: [{
                     dot: true,
                     src: [
-                        '<%= paths.deploy %>/',
+                        '<%= paths.deploy %>/**',
+                        '<%= paths.base %>/**',
                         '<%= paths.build %>/**',
+                        '<%= paths.zip %>/**',
                         '!<%= paths.build %>/.git*'
                     ]
                 }]
@@ -418,29 +497,12 @@ module.exports = function (grunt) {
                 'imagemin',
                 'svgmin'
             ]
-        },
-
-        'ftp-deploy': {
-            build: {
-                auth: {
-                    host: '<%= pkg.serverHost %>',
-                    port: 21,
-                    authKey: 'serverLogin',
-                    authPath: 'package.json'
-                },
-                src: '<%= paths.deploy %>/',
-                dest: '<%= pkg.serverPath %>',
-                exclusions: ['<%= paths.deploy %>/**/.DS_Store', '<%= paths.deploy %>/**/Thumbs.db']
-            }
         }
     });
 
-    grunt.registerTask('test', ['clean:server', 'copy:styles', 'autoprefixer', 'connect:test', 'mocha']);
-    grunt.registerTask('build', ['clean:release', 'jshint', 'concurrent:full', 'concat:styles', 'concat:scripts', 'autoprefixer:full']);
-
-    grunt.registerTask('serve', ['build', 'copy:full', 'connect:livereload', 'watch']);
-    grunt.registerTask('deploy', ['build', 'uglify', 'cssmin', 'copy:full', 'zip']);
-    grunt.registerTask('upload', ['build', 'uglify', 'cssmin', 'copy:full', 'ftp-deploy']);
+    grunt.registerTask('build', ['clean:release', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
+    grunt.registerTask('serve', ['build', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
+    grunt.registerTask('deploy', ['build', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
 
     grunt.registerTask('default', ['serve']);
 };
