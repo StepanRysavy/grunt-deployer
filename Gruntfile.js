@@ -5,6 +5,8 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt); // Load grunt tasks automatically
     require('time-grunt')(grunt); // Time how long tasks take. Can help when optimizing build times
 
+    var path = require('path');
+    var pathObject = path.resolve().split(path.sep);
     var options = {
         dev: grunt.option('dev')
     };
@@ -15,24 +17,30 @@ module.exports = function (grunt) {
         paths: {
             dev: 'Code',
             deploy: 'Deploy',
+            build: '.build',
             img: 'img',
             css: 'css',
             js: 'js',
             lib: 'lib',
-            build: '.build',
+            zip: 'ZIP',
             bower: 'bower_components',
             temp: '.temp',
-            test: 'test/spec'
+            test: 'test/spec',
+            root: pathObject[pathObject.length - 1]
         },
 
         pkg: grunt.file.readJSON('package.json'),
+
+        zip: {
+          '<%= paths.zip %>/<%= paths.root %>.zip': ['<%= paths.build %>/**/*.*']
+        },
 
         // Build less files into css ones
         less: {
             full: {
                 options: {
                     sourceMap: true,
-                    sourceMapFilename: "<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/main.css.map",
+                    sourceMapFilename: "<%= paths.build %>/<%= paths.css %>/main.css.map",
                     sourceMapURL: 'main.css.map',
                     outputSourceFiles: true
                 },
@@ -41,7 +49,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: '<%= paths.dev %>/<%= paths.css %>/',
                         src: 'main.less',
-                        dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/',
+                        dest: '<%= paths.build %>/<%= paths.css %>/',
                         ext: '.css'
                     }
                 ]
@@ -54,12 +62,7 @@ module.exports = function (grunt) {
                     banner: '<%= pkg.banner %>'
                 },
                 files: {
-                    '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/main.css': ['<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/main.css']
-                }
-            },
-            critical: {
-                files: {
-                    '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/critical.css': ['<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/critical.css']
+                    '<%= paths.build %>/<%= paths.css %>/main.css': ['<%= paths.build %>/<%= paths.css %>/main.css']
                 }
             }
         },
@@ -77,7 +80,14 @@ module.exports = function (grunt) {
                     '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
                     '<%= paths.dev %>/<%= paths.js %>/app.js'
                 ],
-                dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.js %>/app.js'
+                dest: '<%= paths.build %>/<%= paths.js %>/app.js'
+            },
+            styles: {
+                src: [
+                    '<%= paths.dev %>/<%= paths.css %>/**/*.css',
+                    '<%= paths.build %>/<%= paths.css %>/*.css'
+                ],
+                dest: '<%= paths.build %>/<%= paths.css %>/main.css'
             }
         },
 
@@ -87,7 +97,7 @@ module.exports = function (grunt) {
             },
             full: {
                 files: {
-                    '<%= paths.dev %>/<%= paths.build %>/<%= paths.js %>/app.js': ['<%= paths.dev %>/<%= paths.build %>/<%= paths.js %>/app.js']
+                    '<%= paths.build %>/<%= paths.js %>/app.js': ['<%= paths.build %>/<%= paths.js %>/app.js']
                 }
             }
         },
@@ -97,20 +107,20 @@ module.exports = function (grunt) {
                 options: {
                     base: './',
                     css: [
-                        '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/main.css'
+                        '<%= paths.build %>/<%= paths.css %>/main.css'
                     ],
                     width: 1280,
                     height: 800
                 },
                 src: '<%= paths.dev %>/index.html',
-                dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/critical.css'
+                dest: '<%= paths.build %>/<%= paths.css %>/critical.css'
             }
         },
 
         inline: {
             dist: {
                 src: ['<%= paths.dev %>/index.html'],
-                dest: ['<%= paths.dev %>/<%= paths.build %>/']
+                dest: ['<%= paths.build %>/']
             }
         },
 
@@ -132,8 +142,14 @@ module.exports = function (grunt) {
                     },
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>',
+                        cwd: '<%= paths.build %>',
                         src: '**/*.*',
+                        dest: '<%= paths.deploy %>/'
+                    },
+                    {
+                        expand: true,
+                        cwd: '<%= paths.dev %>/',
+                        src: '*.*',
                         dest: '<%= paths.deploy %>/'
                     },
                     {
@@ -141,18 +157,6 @@ module.exports = function (grunt) {
                         cwd: '<%= paths.bower %>',
                         src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.lib %>/<%= paths.bower %>'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/',
-                        src: '*.html',
-                        dest: '<%= paths.deploy %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>',
-                        src: 'index.html',
-                        dest: '<%= paths.deploy %>/'
                     }
                 ]
             },
@@ -160,14 +164,18 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/',
-                        src: '**/*.*',
+                        cwd: '<%= paths.build %>/<%= paths.css %>/',
+                        src: '**/*.css',
                         dest: '<%= paths.deploy %>/<%= paths.css %>/'
-                    },
+                    }
+                ]
+            },
+            rootfiles: {
+                files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>',
-                        src: 'index.html',
+                        cwd: '<%= paths.dev %>/',
+                        src: '*.*',
                         dest: '<%= paths.deploy %>/'
                     }
                 ]
@@ -176,7 +184,7 @@ module.exports = function (grunt) {
                 files: [
                     {
                         expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.js %>/',
+                        cwd: '<%= paths.build %>/<%= paths.js %>/',
                         src: '**/*.*',
                         dest: '<%= paths.deploy %>/<%= paths.js %>/'
                     }
@@ -224,15 +232,15 @@ module.exports = function (grunt) {
         // Add vendor prefixed styles
         autoprefixer: {
             options: {
-                browsers: ['last 2 version'],
+                browsers: ['last 2 version', 'ie >= 9'],
                 map: true
             },
             full: {
                 files: [{
                     expand: true,
-                    cwd: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/',
+                    cwd: '<%= paths.build %>/<%= paths.css %>/',
                     src: '*.css',
-                    dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.css %>/'
+                    dest: '<%= paths.build %>/<%= paths.css %>/'
                 }]
             }
         },
@@ -244,7 +252,7 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: '<%= paths.dev %>/<%= paths.img %>/',
                     src: '**/*.{gif,jpeg,jpg,png}',
-                    dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.img %>/'
+                    dest: '<%= paths.build %>/<%= paths.img %>/'
                 }]
             }
         },
@@ -254,7 +262,7 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: '<%= paths.dev %>/<%= paths.img %>/',
                     src: '*.svg',
-                    dest: '<%= paths.dev %>/<%= paths.build %>/<%= paths.img %>/'
+                    dest: '<%= paths.build %>/<%= paths.img %>/'
                 }]
             }
         },
@@ -276,14 +284,30 @@ module.exports = function (grunt) {
             },
             gruntfile: {
                 files: ['Gruntfile.js'],
-                tasks: ['build', 'inline', 'copy:full']
+                tasks: ['build', 'copy:full']
             },
 
             less: {
                 files: [
                     '<%= paths.dev %>/<%= paths.css %>/**/*.less',
                 ],
-                tasks: ['less', 'autoprefixer', 'critical', 'inline', 'copy:styles']
+                tasks: ['less', 'concat:styles', 'autoprefixer', 'copy:styles']
+            },
+
+            css: {
+                files: [
+                    '<%= paths.dev %>/<%= paths.css %>/**/*.css',
+                ],
+                tasks: ['concat:styles', 'autoprefixer', 'copy:styles']
+            },
+
+            rootfiles: {
+                files: [
+                    '<%= paths.dev %>/*.*',
+                ], 
+                tasks: [
+                    'copy:rootfiles'
+                ]
             },
 
             scripts: {
@@ -311,7 +335,7 @@ module.exports = function (grunt) {
                 files: [
                     '<%= paths.dev %>/*.html', 
                 ],
-                tasks: ['critical', 'inline', 'copy:html']
+                tasks: ['copy:html']
             },
 
             livereload: {
@@ -367,8 +391,8 @@ module.exports = function (grunt) {
                     dot: true,
                     src: [
                         '<%= paths.deploy %>/',
-                        '<%= paths.dev %>/<%= paths.build %>/**',
-                        '!<%= paths.dev %>/<%= paths.build %>/.git*'
+                        '<%= paths.build %>/**',
+                        '!<%= paths.build %>/.git*'
                     ]
                 }]
             },
@@ -390,7 +414,7 @@ module.exports = function (grunt) {
             ],
             full: [
                 'less',
-                'concat',
+                'concat:scripts',
                 'imagemin',
                 'svgmin'
             ]
@@ -412,11 +436,11 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('test', ['clean:server', 'copy:styles', 'autoprefixer', 'connect:test', 'mocha']);
-    grunt.registerTask('build', ['clean:release', 'jshint', 'concurrent:full', 'autoprefixer:full', 'critical']);
+    grunt.registerTask('build', ['clean:release', 'jshint', 'concurrent:full', 'concat:styles', 'concat:scripts', 'autoprefixer:full']);
 
-    grunt.registerTask('serve', ['build', 'inline', 'copy:full', 'connect:livereload', 'watch']);
-    grunt.registerTask('deploy', ['build', 'uglify', 'cssmin', 'inline', 'copy:full', 'connect:livereload', 'watch:livereload']);
-    grunt.registerTask('upload', ['build', 'uglify', 'cssmin', 'inline', 'copy:full', 'ftp-deploy']);
+    grunt.registerTask('serve', ['build', 'copy:full', 'connect:livereload', 'watch']);
+    grunt.registerTask('deploy', ['build', 'uglify', 'cssmin', 'copy:full', 'zip']);
+    grunt.registerTask('upload', ['build', 'uglify', 'cssmin', 'copy:full', 'ftp-deploy']);
 
     grunt.registerTask('default', ['serve']);
 };

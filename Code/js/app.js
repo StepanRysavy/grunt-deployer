@@ -2,11 +2,8 @@
 
     'use strict';	
 
-    app.loadCSS("/css/main.css", init);
-
-    function init () {
-		app.replaceLinksWithImages();
-    	app.log();
-    }
+	var myFT = new FT();
+	var container = FT.query("#container");
+	myFT.applyClickTag(container, 1);
 
 })(window, window.app, window.data);
