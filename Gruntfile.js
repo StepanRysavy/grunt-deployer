@@ -363,15 +363,6 @@ module.exports = function (grunt) {
             }
         },
 
-        // Test your code with jasmine
-        mocha: {
-            test: ["<%= paths.dev %>/<%= paths.test %>/index.html"]
-        },
-
-        jshint: {
-            all: ['<%= paths.dev %>/<%= paths.js %>/*.js', '<%= paths.dev %>/<%= paths.js %>/modules/**/*.js']
-        },
-
         // Watches files for changes and runs tasks based on the changed files
         watch: {
             less: {
