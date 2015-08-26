@@ -37,12 +37,14 @@ module.exports = function (grunt) {
             base: {
                 cwd: '<%= paths.base %>',
                 src: ['<%= paths.base %>/**/*.*'],
-                dest: '<%= paths.zip %>/<%= paths.root %>_Base.zip'
+                dest: '<%= paths.zip %>/<%= paths.root %>.zip',
+                compression: 'DEFLATE'
             },
             richload: {
                 cwd: '<%= paths.deploy %>',
                 src: ['<%= paths.deploy %>/**/*.*'],
-                dest: '<%= paths.zip %>/<%= paths.root %>_Richload.zip'
+                dest: '<%= paths.zip %>/<%= paths.root %>_Richload.zip',
+                compression: 'DEFLATE'
             }
         },
 
@@ -131,7 +133,8 @@ module.exports = function (grunt) {
         cssmin: {
             main: {
                 options: {
-                    banner: '<%= pkg.banner %>'
+                    banner: '<%= pkg.banner %>',
+                    'processImport': false
                 },
                 files: {
                     '<%= paths.build %>/<%= paths.css %>/main.css': ['<%= paths.build %>/<%= paths.css %>/main.css']
@@ -500,9 +503,9 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('build', ['clean:release', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
-    grunt.registerTask('serve', ['build', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
-    grunt.registerTask('deploy', ['build', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
+    grunt.registerTask('prepare', ['clean:release', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
+    grunt.registerTask('serve', ['prepare', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
+    grunt.registerTask('build', ['prepare', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
 
     grunt.registerTask('default', ['serve']);
 };
