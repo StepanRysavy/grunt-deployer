@@ -49,6 +49,24 @@ module.exports = function (grunt) {
         },
 
         replace: {
+          less: {
+            options: {
+              patterns: [
+                {
+                  match: '{{width}}',
+                  replacement: '<%= pkg.width %>px'
+                },
+                {
+                  match: '{{height}}',
+                  replacement: '<%= pkg.height %>px'
+                }
+              ],
+              usePrefix: false
+            },
+            files: [
+                {expand: true, flatten: true, src: ['<%= paths.dev %>/<%= paths.css %>/build/vars.less'], dest: '<%= paths.dev %>/<%= paths.css %>'}
+            ]
+          },
           dist: {
             options: {
               patterns: [
@@ -494,7 +512,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('prepare', ['clean:release', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
+    grunt.registerTask('prepare', ['clean:release', 'replace:less', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
     grunt.registerTask('serve', ['prepare', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
     grunt.registerTask('build', ['prepare', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
 
