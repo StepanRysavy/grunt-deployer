@@ -165,6 +165,16 @@ module.exports = function (grunt) {
             options: {
                 stripBanners: true
             },
+            scriptsDev: {
+                src: [
+                    '<%= paths.dev %>/<%= paths.js %>/define.js',
+                    '<%= paths.dev %>/<%= paths.js %>/dev-only/*.js',
+                    '<%= paths.dev %>/<%= paths.js %>/lib/*.js',
+                    '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
+                    '<%= paths.dev %>/<%= paths.js %>/app.js'
+                ],
+                dest: '<%= paths.build %>/<%= paths.js %>/app.js'
+            },
             scripts: {
                 src: [
                     '<%= paths.dev %>/<%= paths.js %>/define.js',
@@ -512,9 +522,9 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('prepare', ['clean:release', 'replace:less', 'concurrent:full', 'concat:styles', 'concat:scripts', 'replace:dist']);
-    grunt.registerTask('serve', ['prepare', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
-    grunt.registerTask('build', ['prepare', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
+    grunt.registerTask('prepare', ['clean:release', 'replace:less', 'concurrent:full', 'concat:styles', 'replace:dist']);
+    grunt.registerTask('serve', ['prepare', 'concat:scriptsDev', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
+    grunt.registerTask('build', ['prepare', 'concat:scripts', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
 
     grunt.registerTask('default', ['serve']);
 };
