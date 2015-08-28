@@ -1,9 +1,9 @@
-(function (window, app, data) {
+(function (window, ad) {
 
     'use strict';	
 
-	var myFT = new FT();
-	var container = FT.query("#container");
-	myFT.applyClickTag(container, 1);
+	ad.myFT.applyClickTag(FT.query("#container"), 1);
 
-})(window, window.app, window.data);
+	console.log(ad);
+
+})(window, window.vccp);

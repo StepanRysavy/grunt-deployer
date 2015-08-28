@@ -3,11 +3,16 @@
 
     window = window || {};
 
-    function App () {}
-    function Data () {}
+    function VCCP () {
+    	return {
+    		app: {},
+    		data: {
+    			cache: 1 * new Date()
+    		},
+    		myFT: window.myFT || new FT()
+    	}
+    }
 
-    window.app = new App();
-    window.data = new Data();
-    window.data.cache = 1 * new Date();
+    var vccp = window.vccp = new VCCP();
 
 })(window);

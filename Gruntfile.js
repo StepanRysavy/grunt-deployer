@@ -167,9 +167,9 @@ module.exports = function (grunt) {
             },
             scriptsDev: {
                 src: [
-                    '<%= paths.dev %>/<%= paths.js %>/define.js',
                     '<%= paths.dev %>/<%= paths.js %>/dev-only/*.js',
                     '<%= paths.dev %>/<%= paths.js %>/lib/*.js',
+                    '<%= paths.dev %>/<%= paths.js %>/define.js',
                     '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
                     '<%= paths.dev %>/<%= paths.js %>/app.js'
                 ],
@@ -177,8 +177,8 @@ module.exports = function (grunt) {
             },
             scripts: {
                 src: [
-                    '<%= paths.dev %>/<%= paths.js %>/define.js',
                     '<%= paths.dev %>/<%= paths.js %>/lib/*.js',
+                    '<%= paths.dev %>/<%= paths.js %>/define.js',
                     '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
                     '<%= paths.dev %>/<%= paths.js %>/app.js'
                 ],
@@ -420,7 +420,7 @@ module.exports = function (grunt) {
                 files: [
                     '<%= paths.dev %>/<%= paths.js %>/**/*.js',
                 ],
-                tasks: ['concat:scripts', 'copy:scripts']
+                tasks: ['concat:scriptsDev', 'copy:scripts']
             },
 
             lib: {
