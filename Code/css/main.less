@@ -2,9 +2,59 @@
 @import 'reset';
 @import 'vars';
 
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+}
+
 #container {
 	cursor: pointer;
 	width: @width;
 	height: @height;
-	background: fade(#000, 5%);
+	display: flex !important;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	letter-spacing: -.03em;
+	-webkit-font-smoothing: antialiased;
+	line-height: 1.2;
+	font-size: 1.25rem;
+}
+
+.bg {
+	filter: none; /* IE9 needs this */
+	background: url('../img/bg.png') repeat-x; /* Old browsers */
+    /*IE9 SVG, needs conditional override of 'filter' to 'none' */
+	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzA3MTAzOSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEzJSIgc3RvcC1jb2xvcj0iIzA5MWM0MyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjM5JSIgc3RvcC1jb2xvcj0iIzAwM2M3NSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjUyJSIgc3RvcC1jb2xvcj0iIzAwNTA4ZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjY1JSIgc3RvcC1jb2xvcj0iIzAwNmNhNyIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9Ijc3JSIgc3RvcC1jb2xvcj0iIzAwN2ZiYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9Ijg5JSIgc3RvcC1jb2xvcj0iIzJjOTdjOSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiM1NmFjZGEiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+	background: -moz-linear-gradient(-60deg, #071039 0%, #091c43 13%, #002a59 26%, #003c75 39%, #00508e 52%, #006ca7 65%, #007fbb 77%, #2c97c9 89%, #56acda 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right bottom, color-stop(0%,#071039), color-stop(13%,#091c43), color-stop(26%,#002a59), color-stop(39%,#003c75), color-stop(52%,#00508e), color-stop(65%,#006ca7), color-stop(77%,#007fbb), color-stop(89%,#2c97c9), color-stop(100%,#56acda)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(-60deg, #071039 0%,#091c43 13%,#002a59 26%,#003c75 39%,#00508e 52%,#006ca7 65%,#007fbb 77%,#2c97c9 89%,#56acda 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(-60deg, #071039 0%,#091c43 13%,#002a59 26%,#003c75 39%,#00508e 52%,#006ca7 65%,#007fbb 77%,#2c97c9 89%,#56acda 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(-60deg, #071039 0%,#091c43 13%,#002a59 26%,#003c75 39%,#00508e 52%,#006ca7 65%,#007fbb 77%,#2c97c9 89%,#56acda 100%); /* IE10+ */
+	background: linear-gradient(150deg, #071039 0%,#091c43 13%,#002a59 26%,#003c75 39%,#00508e 52%,#006ca7 65%,#007fbb 77%,#2c97c9 89%,#56acda 100%); /* W3C */
+}
+
+.bd {
+	font-family: frutiger_bd;
+}
+
+.rg {
+	font-family: frutiger_rg;
+}
+
+.fallback {
+	font-family: Helvetica, Arial;
+	font-size: 1rem;
+	margin-top: 1rem;
+}
+
+.sans {
+	font-family: sans-serif;
+	font-size: 1rem;
 }
