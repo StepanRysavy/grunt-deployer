@@ -32,7 +32,9 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         zip: {
-          '<%= paths.zip %>/<%= paths.root %>.zip': ['<%= paths.build %>/**/*.*']
+            src: ['<%= paths.build %>/**/*.*'],
+            dest: '<%= paths.zip %>/<%= paths.root %>.zip', 
+            compression: 'DEFLATE'
         },
 
         // Build less files into css ones
@@ -99,28 +101,6 @@ module.exports = function (grunt) {
                 files: {
                     '<%= paths.build %>/<%= paths.js %>/app.js': ['<%= paths.build %>/<%= paths.js %>/app.js']
                 }
-            }
-        },
-
-        critical: {
-            test: {
-                options: {
-                    base: './',
-                    css: [
-                        '<%= paths.build %>/<%= paths.css %>/main.css'
-                    ],
-                    width: 1280,
-                    height: 800
-                },
-                src: '<%= paths.dev %>/index.html',
-                dest: '<%= paths.build %>/<%= paths.css %>/critical.css'
-            }
-        },
-
-        inline: {
-            dist: {
-                src: ['<%= paths.dev %>/index.html'],
-                dest: ['<%= paths.build %>/']
             }
         },
 
@@ -267,21 +247,8 @@ module.exports = function (grunt) {
             }
         },
 
-        // Test your code with jasmine
-        mocha: {
-            test: ["<%= paths.dev %>/<%= paths.test %>/index.html"]
-        },
-
-        jshint: {
-            all: ['<%= paths.dev %>/<%= paths.js %>/*.js', '<%= paths.dev %>/<%= paths.js %>/modules/**/*.js']
-        },
-
         // Watches files for changes and runs tasks based on the changed files
         watch: {
-            test: {
-                files: ['<%= paths.dev %>/<%= paths.test %>/spec/*.js'], 
-                tasks: ['connect:test', 'jasmine']
-            },
             gruntfile: {
                 files: ['Gruntfile.js'],
                 tasks: ['build', 'copy:full']
@@ -314,7 +281,7 @@ module.exports = function (grunt) {
                 files: [
                     '<%= paths.dev %>/<%= paths.js %>/**/*.js',
                 ],
-                tasks: ['jshint', 'concat:scripts', 'copy:scripts']
+                tasks: ['concat:scripts', 'copy:scripts']
             },
 
             lib: {
@@ -363,16 +330,6 @@ module.exports = function (grunt) {
                     ]
                 }
             },
-            test: {
-                options: {
-                    port: 9001,
-                    base: [
-                        '<%= paths.dev %>/<%= paths.temp %>/',
-                        '<%= paths.dev %>/<%= paths.test %>/',
-                        './'
-                        ]
-                }
-            },
             release: {
                 options: {
                     open: true,
@@ -418,29 +375,14 @@ module.exports = function (grunt) {
                 'imagemin',
                 'svgmin'
             ]
-        },
-
-        'ftp-deploy': {
-            build: {
-                auth: {
-                    host: '<%= pkg.serverHost %>',
-                    port: 21,
-                    authKey: 'serverLogin',
-                    authPath: 'package.json'
-                },
-                src: '<%= paths.deploy %>/',
-                dest: '<%= pkg.serverPath %>',
-                exclusions: ['<%= paths.deploy %>/**/.DS_Store', '<%= paths.deploy %>/**/Thumbs.db']
-            }
         }
     });
 
-    grunt.registerTask('test', ['clean:server', 'copy:styles', 'autoprefixer', 'connect:test', 'mocha']);
-    grunt.registerTask('build', ['clean:release', 'jshint', 'concurrent:full', 'concat:styles', 'concat:scripts', 'autoprefixer:full']);
+    grunt.registerTask('test', ['clean:server', 'copy:styles', 'autoprefixer']);
+    grunt.registerTask('build', ['clean:release', 'concurrent:full', 'concat:styles', 'concat:scripts', 'autoprefixer:full']);
 
     grunt.registerTask('serve', ['build', 'copy:full', 'connect:livereload', 'watch']);
     grunt.registerTask('deploy', ['build', 'uglify', 'cssmin', 'copy:full', 'zip']);
-    grunt.registerTask('upload', ['build', 'uglify', 'cssmin', 'copy:full', 'ftp-deploy']);
 
     grunt.registerTask('default', ['serve']);
 };
