@@ -2,17 +2,16 @@
     'use strict';
 
     window = window || {};
+    window.vccp = window.vccp || function () {
+        return {
+            app: {},
+            data: {
+                cache: 1 * new Date()
+            },
+            myFT: window.myFT || new FT
+        }
+    }();
 
-    function VCCP () {
-    	return {
-    		app: {},
-    		data: {
-    			cache: 1 * new Date()
-    		},
-    		myFT: window.myFT || new FT()
-    	}
-    }
-
-    var vccp = window.vccp = new VCCP();
+    console.log(window.vccp);
 
 })(window);

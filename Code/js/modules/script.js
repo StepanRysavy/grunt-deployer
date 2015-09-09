@@ -12,7 +12,7 @@ var Advert = {
 	animationArr: [],
 	debugMode: 0,
 	duration: 0.2,
-	timeline: new TimelineMax({
+	timeline: new TimelineLite({
 		delay: 0,
 		onComplete: function(){}
 	}),
@@ -38,8 +38,8 @@ var Advert = {
 
 		this.setInstantAds();
 
-		TweenMax.set($('#container'), {display: 'block'});
-		TweenMax.set($('#container, .section, .clickTag'), {width: this.width, height: this.height});
+		TweenLite.set($('#container'), {display: 'block'});
+		TweenLite.set($('#container, .section, .clickTag'), {width: this.width, height: this.height});
 		this.setAnim();
 		//this.initVideo();
 		this.setCarousel();
@@ -184,7 +184,7 @@ var Advert = {
 		@param none
 	**/
 	hideVideo: function() {
-		TweenMax.to( $("video") , 1, { autoAlpha: 0 });
+		TweenLite.to( $("video") , 1, { autoAlpha: 0 });
 		// $("video").get(0).pause();
 	},
 
@@ -203,9 +203,9 @@ var Advert = {
 		// has to be greater than 0. Animation will be disable
 		var testSection = _this.debugMode;
 		if(testSection > 0){
-			TweenMax.set($('.section').eq(testSection - 1), {display: 'block'});
+			TweenLite.set($('.section').eq(testSection - 1), {display: 'block'});
 		} else {
-			TweenMax.set($('.section'), {display: 'block'});
+			TweenLite.set($('.section'), {display: 'block'});
 		}
 
 		/**
