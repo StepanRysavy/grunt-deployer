@@ -1,530 +1,281 @@
-// Generated on 2014-07-11 using generator-durandal 0.1.5
-'use strict';
-
 module.exports = function (grunt) {
-    require('load-grunt-tasks')(grunt); // Load grunt tasks automatically
-    require('time-grunt')(grunt); // Time how long tasks take. Can help when optimizing build times
 
-    var path = require('path');
-    var pathObject = path.resolve().split(path.sep);
-    var options = {
-        dev: grunt.option('dev')
-    };
+	'use strict';
 
-    // Define the configuration for all the tasks
-    grunt.initConfig({
-        // Configurable paths
-        paths: {
-            dev: 'Code',
-            base: 'Base',
-            deploy: 'Richload',
-            build: '.build',
-            img: 'img',
-            css: 'css',
-            fonts: 'css/fonts',
-            js: 'js',
-            lib: 'lib',
-            zip: 'ZIP',
-            bower: 'bower_components',
-            temp: '.temp',
-            test: 'test/spec',
-            root: pathObject[pathObject.length - 1]
-        },
+	var path = require('path'),
+    	pathObject = path.resolve().split(path.sep),
+    	pathRoot = pathObject[pathObject.length - 1];
 
-        pkg: grunt.file.readJSON('package.json'),
+	// Load grunt tasks automatically
+	require('load-grunt-tasks')(grunt);
 
-        zip: {
-            base: {
-                cwd: '<%= paths.base %>',
-                src: ['<%= paths.base %>/**/*.*'],
-                dest: '<%= paths.zip %>/<%= paths.root %>.zip',
+	var options = {
+		pkg: require('./package'), // e.g. <%=pkg.name%>
+
+		/**
+		 * Config - Edit this section
+		 * ==========================
+		 * Choose javascript dist filename
+		 * Choose javascript dist location
+		 * Choose javascript files to be uglified
+		 */
+		config : {
+
+			api: "2.8",
+			srcDir: 'src', // <%=config.srcDir%>
+			distDir: 'dist', // <%=config.distDir%>
+            libDir: 'lib', // <%=config.libDir%>
+            zipDir: 'zip', // <%=config.zipDir%>
+            buildDir: 'build', // <%=config.zipDir%>
+
+			less : {
+				cssFile : 'initial' // <%=config.less.cssFile%>
+			},
+
+			plugins : {
+				// <%=config.js.distDir%>
+				distDir  : '<%=config.distDir%>/<%=config.libDir%>/',
+
+				// <%=config.js.distFile%>
+				distFile : 'plugins.min.js',
+ 
+				// <%=config.js.fileList%>
+				fileList : [
+					'assets/js/move.js',
+
+				]
+			}
+		}
+	};
+
+	// Load grunt configurations automatically
+	var configs = require('load-grunt-configs')(grunt, options);
+
+	grunt.registerTask("prepareBanners", "Uglifies local JS and LIB", function() {
+
+	    // get all module directories
+	    grunt.file.expand("src/*").forEach(function (dir) {
+
+	        // get the module name from the directory name
+	        var dirName = dir.substr(dir.lastIndexOf('/')+1),
+	        	dimension = dirName.split("x");
+
+	        // get the current concat object from initConfig
+	        var uglify 	= grunt.config.get('uglify') 	|| {},
+	        	concat 	= grunt.config.get('concat') 	|| {},
+	        	rename 	= grunt.config.get('rename') 	|| {},
+	        	replace = grunt.config.get('replace') 	|| {},
+	        	copy 	= grunt.config.get('copy') 		|| {},
+	        	zip 	= grunt.config.get('zip') 		|| {};
+
+	        copy[dirName + "_Dist"] = {
+				files: [{
+					expand: true,
+					cwd : dir,
+					// Copies all css, ttf and map files but not anything in the lib directory
+					src: ['**/index.html', '**/manifest.js', '**/*.css', '**/*.png', '**/*.jpg', '**/*.gif', '**/*.woff'],
+					dest: '<%=config.distDir%>/' + dirName
+				}]
+	        };
+
+	        copy[dirName + "_Richload"] = {
+				files: [{
+					expand: true,
+					cwd : dir,
+					// Copies all css, ttf and map files but not anything in the lib directory
+					src: ['**/index.html', '**/*.css', '**/*.png', '**/*.jpg', '**/*.gif', '**/*.woff'],
+					dest: '<%=config.buildDir%>/' + dirName + "_Richload"
+				}]
+	        };
+
+	        copy[dirName + "_Base"] = {
+				files: [{
+					expand: true,
+					cwd : dir,
+					// Copies all css, ttf and map files but not anything in the lib directory
+					src: ['**/base.html', 'manifest.js'],
+					dest: '<%=config.buildDir%>/' + dirName + "_Base"
+				}]
+	        };
+
+	        // create a subtask for each module, find all src files
+	        // and combine into a single js file per module
+	        uglify[dirName] = {
+	            src: [dir + '/js/**/*.js', '!' + dir + '/manifest.js', '!' + dir + '/js/app.js'],
+	            dest: dir + '/js/app.js'
+	        };
+
+	        concat[dirName + "_Dist"] = {
+	            src: ['dev-only/**/*.js', 'lib/**/*.js', dir + '/js/app.js'],
+	            dest: '<%=config.distDir%>/' + dirName + '/js/app.js'
+	        };
+
+	        concat[dirName + "_Richload"] = {
+	            src: ['lib/**/*.js', dir + '/js/app.js'],
+	            dest: '<%=config.buildDir%>/' + dirName + "_Richload/js/app.js"
+	        };
+
+	        replace[dirName] = {
+	            options: {
+	              patterns: [
+	                {
+	                  match: '{{width}}',
+	                  replacement: dimension[0]
+	                },
+	                {
+	                  match: '{{height}}',
+	                  replacement: dimension[1]
+	                },
+	                {
+	                  match: '{{api}}',
+	                  replacement: '<%=config.api%>'
+	                }
+	              ],
+	              usePrefix: false
+	            },
+	            files: [
+	              {expand: true, flatten: true, src: ['<%=config.distDir%>/' + dirName + '/*.*'], 			dest: '<%=config.distDir%>/' + dirName},
+	              {expand: true, flatten: true, src: ['<%=config.buildDir%>/' + dirName + '_Richload/*.*'], dest: '<%=config.buildDir%>/' + dirName + '_Richload'},
+	              {expand: true, flatten: true, src: ['<%=config.buildDir%>/' + dirName + '_Base/*.*'], 	dest: '<%=config.buildDir%>/' + dirName + '_Base'}
+	            ]
+	        };
+
+	        replace[dirName + "_Dist"] = {
+	            options: {
+	              patterns: [
+	                {
+	                  match: '{{test}}',
+	                  replacement: ''
+	                }
+	              ],
+	              usePrefix: false
+	            },
+	            files: [
+	              {expand: true, flatten: true, src: ['<%=config.distDir%>/' + dirName + '/*.*'], dest: '<%=config.distDir%>/' + dirName}
+	            ]
+	        };
+
+	        replace[dirName + "_Richload"] = {
+	            options: {
+	              patterns: [
+	                {
+	                  match: '{{test}}',
+	                  replacement: ' '
+	                }
+	              ],
+	              usePrefix: false
+	            },
+	            files: [
+	              {expand: true, flatten: true, src: ['<%=config.buildDir%>/' + dirName + '_Richload/*.*'], dest: '<%=config.buildDir%>/' + dirName + '_Richload'}
+	            ]
+	        };
+
+	        rename[dirName] = {
+	        	src:  '<%=config.buildDir%>/' + dirName + '_Base/base.html',
+                dest: '<%=config.buildDir%>/' + dirName + '_Base/index.html'
+	        };
+
+	        zip[dirName + "_Base"] = {
+                cwd: '<%=config.buildDir%>',
+                src: ['<%=config.buildDir%>/' + dirName + '_Base/**/*.*'],
+                dest: '<%=config.zipDir%>/' + pathRoot + '_' + dirName + '.zip',
                 compression: 'DEFLATE'
-            },
-            richload: {
-                cwd: '<%= paths.deploy %>',
-                src: ['<%= paths.deploy %>/**/*.*'],
-                dest: '<%= paths.zip %>/<%= paths.root %>_Richload.zip',
+	        };
+
+	        zip[dirName + "_Richload"] = {
+                cwd: '<%=config.buildDir%>',
+                src: ['<%=config.buildDir%>/' + dirName + '_Richload/**/*.*'],
+                dest: '<%=config.zipDir%>/' + pathRoot + '_' + dirName + '_Richload.zip',
                 compression: 'DEFLATE'
-            }
-        },
+	        };
 
-        replace: {
-          less: {
-            options: {
-              patterns: [
-                {
-                  match: '{{width}}',
-                  replacement: '<%= pkg.width %>px'
-                },
-                {
-                  match: '{{height}}',
-                  replacement: '<%= pkg.height %>px'
-                }
-              ],
-              usePrefix: false
-            },
-            files: [
-                {expand: true, flatten: true, src: ['<%= paths.dev %>/<%= paths.css %>/build/vars.less'], dest: '<%= paths.dev %>/<%= paths.css %>'}
-            ]
-          },
-          dist: {
-            options: {
-              patterns: [
-                {
-                  match: '{{width}}',
-                  replacement: '<%= pkg.width %>'
-                },
-                {
-                  match: '{{height}}',
-                  replacement: '<%= pkg.height %>'
-                },
-                {
-                  match: '{{api}}',
-                  replacement: '<%= pkg.api %>'
-                }
-              ],
-              usePrefix: false
-            },
-            files: [
-              {expand: true, flatten: true, src: ['<%= paths.dev %>/*.*'], dest: '<%= paths.build %>/'}
-            ]
-          },
-          serve: {
-            options: {
-              patterns: [
-                {
-                  match: '{{test}}',
-                  replacement: ''
-                }
-              ],
-              usePrefix: false
-            },
-            files: [
-              {expand: true, flatten: true, src: ['<%= paths.build %>/*.*'], dest: '<%= paths.build %>/'}
-            ]
-          },
-          deploy: {
-            options: {
-              patterns: [
-                {
-                  match: '{{test}}',
-                  replacement: ' '
-                }
-              ],
-              usePrefix: false
-            },
-            files: [
-              {expand: true, flatten: true, src: ['<%= paths.build %>/*.*'], dest: '<%= paths.build %>/'}
-            ]
-          }
-        },
+	        // add module subtasks to the concat task in initConfig
+	        grunt.config.set('uglify', uglify);
+	        grunt.config.set('concat', concat);
+	        grunt.config.set('rename', rename);
+	        grunt.config.set('replace', replace);
+	        grunt.config.set('zip', zip);
+	        grunt.config.set('copy', copy);
 
-        rename: {
-            base: {
-                src: '<%= paths.base %>/base.html',
-                dest: '<%= paths.base %>/index.html'
-            }
-        },
+	        grunt.log.ok("Prepared directory: " + dir);
+	    });
+	});
 
-        // Build less files into css ones
-        less: {
-            full: {
-                options: {
-                    sourceMap: true,
-                    sourceMapFilename: "<%= paths.build %>/<%= paths.css %>/main.css.map",
-                    sourceMapURL: 'main.css.map',
-                    outputSourceFiles: true
-                },
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.css %>/',
-                        src: 'main.less',
-                        dest: '<%= paths.build %>/<%= paths.css %>/',
-                        ext: '.css'
-                    }
-                ]
-            }
+	// Define the configuration for all the tasks
+	grunt.initConfig(configs);
 
-        },
+	/* ==========================================================================
+	 * Available tasks:
+	 * grunt            : run jshint, uglify and sass:banners
+	 * grunt watch      : run sass:banners, uglify and livereload
+	 * grunt dev        : run sass:banners & autoprefixer:banners
+	 * grunt deploy     : run jshint, sass:banners and csso
+	 * grunt serve      : watch js & scss and run a local server
+		 ========================================================================== */
 
-        cssmin: {
-            main: {
-                options: {
-                    banner: '<%= pkg.banner %>',
-                    'processImport': false
-                },
-                files: {
-                    '<%= paths.build %>/<%= paths.css %>/main.css': ['<%= paths.build %>/<%= paths.css %>/main.css']
-                }
-            }
-        },
+	/**
+	* GRUNT * Default task
+	* run sass:banners and autoprefixer:banners & sass:initial & autoprefixer:initial
+	*/
+	grunt.registerTask('default', [
+		'newer:less:banners',
+		'autoprefixer:banners',
+		'includes',
+		'browserify:dev',
+		'prepareBanners',
+		'uglify',
+		'htmlbuild',
+		'copy'
+	]);
 
-        // Concatenate files to reduce requests count
-        concat: {
-            options: {
-                stripBanners: true
-            },
-            scriptsDev: {
-                src: [
-                    '<%= paths.dev %>/<%= paths.js %>/dev-only/*.js',
-                    '<%= paths.dev %>/<%= paths.js %>/lib/*.js',
-                    '<%= paths.dev %>/<%= paths.js %>/define.js',
-                    '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
-                    '<%= paths.dev %>/<%= paths.js %>/app.js'
-                ],
-                dest: '<%= paths.build %>/<%= paths.js %>/app.js'
-            },
-            scripts: {
-                src: [
-                    '<%= paths.dev %>/<%= paths.js %>/lib/*.js',
-                    '<%= paths.dev %>/<%= paths.js %>/define.js',
-                    '<%= paths.dev %>/<%= paths.js %>/modules/*.js',
-                    '<%= paths.dev %>/<%= paths.js %>/app.js'
-                ],
-                dest: '<%= paths.build %>/<%= paths.js %>/app.js'
-            },
-            styles: {
-                src: [
-                    '<%= paths.dev %>/<%= paths.css %>/*.css',
-                    '<%= paths.build %>/<%= paths.css %>/*.css'
-                ],
-                dest: '<%= paths.build %>/<%= paths.css %>/main.css'
-            }
-        },
 
-        uglify: {
-            options: {
-                banner: '<%= pkg.banner %>'
-            },
-            full: {
-                files: {
-                    '<%= paths.build %>/<%= paths.js %>/app.js': ['<%= paths.build %>/<%= paths.js %>/app.js']
-                }
-            }
-        },
+	/**
+	 * GRUNT DEV * A task for development
+	 * run sass:banners & autoprefixer:banners & sass:initial & autoprefixer:initial
+	 */
+	grunt.registerTask('dev', [
+		//'clean',
+		'newer:less:banners',
+		'autoprefixer:banners',
+		'includes',
+		'browserify:dev',
+		'uglify',
+		'htmlbuild',
+		'copy'
+	]); 
 
-        // Copies remaining files to places other tasks can use
-        copy: {
-            full: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.lib %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.lib %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.fonts %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.fonts %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/<%= paths.css %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.css %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/<%= paths.img %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.img %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/<%= paths.js %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.js %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>',
-                        src: 'index.html',
-                        dest: '<%= paths.deploy %>/'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>',
-                        src: 'base.html',
-                        dest: '<%= paths.base %>'
-                    },
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>',
-                        src: 'manifest.js',
-                        dest: '<%= paths.base %>/'
-                    }
-                ]
-            },
-            build: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/'
-                    }
-                ]
-            },
-            styles: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/<%= paths.css %>/',
-                        src: '*.css',
-                        dest: '<%= paths.deploy %>/<%= paths.css %>/'
-                    }
-                ]
-            },
-            rootfiles: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/',
-                        src: '*.*',
-                        dest: '<%= paths.deploy %>/'
-                    }
-                ]
-            },
-            scripts: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.build %>/<%= paths.js %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.js %>/'
-                    }
-                ]
-            },
-            lib: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.lib %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.lib %>/'
-                    }
-                ]
-            },
-            img: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.img %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.img %>/'
-                    }
-                ]
-            },
-            fonts: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.dev %>/<%= paths.fonts %>/',
-                        src: '**/*.*',
-                        dest: '<%= paths.deploy %>/<%= paths.fonts %>/'
-                    }
-                ]
-            },
-            manifest: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= paths.base %>',
-                        src: 'manifest.js',
-                        dest: '<%= paths.deploy %>/'
-                    }
-                ]
-            }
-        },
 
-        // Add vendor prefixed styles
-        autoprefixer: {
-            options: {
-                browsers: ['last 2 version', 'ie >= 9']
-            },
-            full: {
-                options: {
-                    map: true
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= paths.build %>/<%= paths.css %>/',
-                    src: '*.css',
-                    dest: '<%= paths.build %>/<%= paths.css %>/'
-                }]
-            },
-            deploy: {
-                options: {
-                    map: false
-                },
-                files: [{
-                    expand: true,
-                    cwd: '<%= paths.build %>/<%= paths.css %>/',
-                    src: '*.css',
-                    dest: '<%= paths.build %>/<%= paths.css %>/'
-                }]
-            }
-        },
+	/**
+	* GRUNT DEPLOY * A task for your production environment
+	* run sass:banners, autoprefixer:banners & sass:initial & autoprefixer:initial and csso
+	*/
+	grunt.registerTask('deploy', [
+		'newer:less:banners',
+		'autoprefixer:banners',
+		// 'csso',
+		'includes',
+		'browserify:deploy',
+		'uglify',
+		'htmlbuild',
+		'copy'
+	]);
 
-        // The following *-min tasks produce minified files in the dist folder
-        imagemin: {
-            release: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= paths.dev %>/<%= paths.img %>/',
-                    src: '**/*.{gif,jpeg,jpg,png}',
-                    dest: '<%= paths.build %>/<%= paths.img %>/'
-                }]
-            }
-        },
-        svgmin: {
-            release: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= paths.dev %>/<%= paths.img %>/',
-                    src: '*.svg',
-                    dest: '<%= paths.build %>/<%= paths.img %>/'
-                }]
-            }
-        },
-
-        // Watches files for changes and runs tasks based on the changed files
-        watch: {
-            less: {
-                files: [
-                    '<%= paths.dev %>/<%= paths.css %>/**/*.less',
-                ],
-                tasks: ['less', 'concat:styles', 'autoprefixer', 'copy:styles']
-            },
-
-            css: {
-                files: [
-                    '<%= paths.dev %>/<%= paths.css %>/**/*.css',
-                ],
-                tasks: ['concat:styles', 'autoprefixer', 'copy:styles']
-            },
-
-            rootfiles: {
-                files: [
-                    '<%= paths.dev %>/*.*',
-                ], 
-                tasks: [
-                    'replace:dist', 'replace:serve', 'copy:rootfiles'
-                ]
-            },
-
-            scripts: {
-                files: [
-                    '<%= paths.dev %>/<%= paths.js %>/**/*.js',
-                ],
-                tasks: ['concat:scriptsDev', 'copy:scripts']
-            },
-
-            lib: {
-                files: [
-                    '<%= paths.dev %>/<%= paths.lib %>/**/*.*',
-                ],
-                tasks: ['copy:lib']
-            },
-
-            img: {
-                files: [
-                    '<%= paths.dev %>/<%= paths.img %>/**/*.*',
-                ],
-                tasks: ['imagemin', 'svgmin', 'copy:img']
-            },
-
-            livereload: {
-                options: {
-                    livereload: '<%= connect.options.livereload %>'
-                },
-                files: [
-                    '<%= paths.dev %>/**/*.*'
-                ]
-            }
-        },
-
-        // The actual grunt server settings
-        connect: {
-            options: {
-                port: 9000,
-                livereload: 35729,
-                hostname: '0.0.0.0' // Change this to '0.0.0.0' to access the server from outside
-            },
-            livereload: {
-                options: {
-                    open: true,
-                    base: [
-                        '<%= paths.deploy %>/'
-                    ]
-                }
-            },
-            test: {
-                options: {
-                    port: 9001,
-                    base: [
-                        '<%= paths.dev %>/<%= paths.temp %>/',
-                        '<%= paths.dev %>/<%= paths.test %>/',
-                        './'
-                        ]
-                }
-            },
-            release: {
-                options: {
-                    open: true,
-                    livereload: false,
-                    base: [
-                        '<%= paths.deploy %>/'
-                    ]
-                }
-            }
-        },
-
-        // Empties folders to start fresh
-        clean: {
-            release: {
-                files: [{
-                    dot: true,
-                    src: [
-                        '<%= paths.deploy %>/**',
-                        '<%= paths.base %>/**',
-                        '<%= paths.build %>/**',
-                        '<%= paths.zip %>/**',
-                        '!<%= paths.build %>/.git*'
-                    ]
-                }]
-            },
-
-            server: '<%= paths.deploy %>/'
-        },
-
-        // Run some tasks in parallel to speed up build process
-        concurrent: {
-            server: [
-                'less:watch',
-                'copy:watch'
-            ],
-            release: [
-                'less:release',
-                'copy:release',
-                'imagemin',
-                'svgmin'
-            ],
-            full: [
-                'less',
-                'concat:scripts',
-                'imagemin',
-                'svgmin'
-            ]
-        }
-    });
-
-    grunt.registerTask('prepare', ['clean:release', 'replace:less', 'concurrent:full', 'concat:styles', 'replace:dist']);
-    grunt.registerTask('serve', ['prepare', 'concat:scriptsDev', 'autoprefixer:full', 'replace:serve', 'copy:full', 'copy:manifest', 'connect:livereload', 'watch']);
-    grunt.registerTask('build', ['prepare', 'concat:scripts', 'autoprefixer:deploy', 'replace:deploy', 'uglify', 'cssmin', 'copy:full', 'rename', 'zip']);
-
-    grunt.registerTask('default', ['serve']);
+	/**
+	 * GRUNT SERVE * A task for for a static server with a watch
+	 * run connect and watch
+	 */
+	grunt.registerTask('serve', [
+		'newer:less:banners',
+		'autoprefixer:banners',
+		'browserify:dev',
+		'prepareBanners',
+		'uglify',
+		'concat',
+		'copy',
+		'replace',
+		'rename',
+		'zip',
+		'connect:site',
+		'watch'
+	]);
 };
